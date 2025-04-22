@@ -34,6 +34,6 @@ public class MainScreen extends AppCompatActivity {
                 logo.clearAnimation();
                 finish();
             }
-        }, 5000);
+        }, 3000);
     }
 }
