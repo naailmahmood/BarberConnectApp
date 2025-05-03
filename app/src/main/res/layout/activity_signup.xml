@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Signup"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/barberchair">
+
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:text="BECOME A BARBER"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="280dp"
+        android:id="@+id/becomeABarberBtn"
+        android:textSize="25sp"
+        android:padding="18dp"
+        android:background="@drawable/segragation_buttons"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/registerAsClientBtn"
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:layout_below="@+id/becomeABarberBtn"
+        android:layout_centerHorizontal="true"
+        android:padding="18dp"
+        android:layout_marginTop="10dp"
+        android:text="REGISTER AS CLIENT"
+        android:textSize="25sp"
+        android:background="@drawable/segragation_buttons"/>
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:visibility="gone" />
+</RelativeLayout>

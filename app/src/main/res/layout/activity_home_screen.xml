@@ -7,8 +7,8 @@
     android:layout_height="match_parent"
     tools:context=".HomeScreen"
     android:fitsSystemWindows="true"
+    android:background="@color/grey"
     >
-
 
     <LinearLayout
         android:id="@+id/linearLayout"
