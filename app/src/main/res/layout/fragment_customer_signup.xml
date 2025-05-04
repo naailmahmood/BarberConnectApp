@@ -90,7 +90,7 @@
 
         <EditText
             android:id="@+id/etCustomerPref"
-            android:hint="Preferances (OPTIONAL)"
+            android:hint="Preferences (OPTIONAL)"
             android:inputType="text"
             android:layout_gravity="center"
             android:background="@drawable/borders"

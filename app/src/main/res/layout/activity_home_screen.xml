@@ -35,7 +35,8 @@
             android:hint="Enter Email"
             android:inputType="textEmailAddress"
             android:paddingVertical="15dp"
-            android:padding="17dp"/>
+            android:padding="17dp"
+            android:id="@+id/email"/>
 
         <EditText
             android:layout_width="250dp"
@@ -46,7 +47,8 @@
             android:hint="Enter Password"
             android:inputType="textPassword"
             android:paddingVertical="15dp"
-            android:padding="17dp"/>
+            android:padding="17dp"
+            android:id="@+id/password"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/loginBtn"

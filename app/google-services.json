@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1030922777773",
+    "project_id": "barberconnect-763b5",
+    "storage_bucket": "barberconnect-763b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1030922777773:android:b592a86feb47607de4c224",
+        "android_client_info": {
+          "package_name": "com.example.firstapp.barberconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClGvL8XYn01jk5j-By_8i6i6NkuxqGUcY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
