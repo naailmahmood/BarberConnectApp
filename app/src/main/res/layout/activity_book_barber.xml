@@ -106,7 +106,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -117,15 +117,23 @@
                 android:inputType="time"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- End Time Display -->
-        <TextView
-            android:id="@+id/tvEndTime"
+        <!-- End Time Display (Updated to match other fields) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEndTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="End time: --:--"
-            android:textSize="16sp"
-            android:layout_marginBottom="24dp"
-            android:textColor="@color/black"/>
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:hint="End time">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEndTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="false"
+                android:inputType="none"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Book Button -->
         <Button

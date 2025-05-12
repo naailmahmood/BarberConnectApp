@@ -8,7 +8,6 @@ import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,9 +40,8 @@ import javax.mail.internet.MimeMessage;
 
 public class BookBarberActivity extends AppCompatActivity {
 
-    private TextInputEditText etDate, etTime, etLocation, etBarberName;
+    private TextInputEditText etDate, etTime, etLocation, etBarberName, etEndTime;
     private AutoCompleteTextView actvService, actvShop;
-    private TextView tvEndTime;
     private Button btnBook;
 
     private Calendar selectedDate = Calendar.getInstance();
@@ -62,14 +60,7 @@ public class BookBarberActivity extends AppCompatActivity {
         setContentView(R.layout.activity_book_barber);
 
         // Initialize views
-        etDate = findViewById(R.id.etDate);
-        etTime = findViewById(R.id.etTime);
-        etLocation = findViewById(R.id.etLocation);
-        etBarberName = findViewById(R.id.etBarberName);
-        actvService = findViewById(R.id.actvService);
-        actvShop = findViewById(R.id.actvShop);
-        tvEndTime = findViewById(R.id.tvEndTime);
-        btnBook = findViewById(R.id.btnBook);
+        initializeViews();
 
         // Setup shop dropdown
         setupShopDropdown();
@@ -78,24 +69,27 @@ public class BookBarberActivity extends AppCompatActivity {
         loadServices();
 
         // Set up date picker
-        etDate.setOnClickListener(v -> showDatePickerDialog());
+        setupDatePicker();
 
         // Set up time picker
-        etTime.setOnClickListener(v -> showTimePickerDialog());
+        setupTimePicker();
 
         // Time change listener for end time calculation
-        etTime.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                calculateEndTime();
-            }
-        });
+        setupTimeChangeListener();
 
         // Book button click listener
-        btnBook.setOnClickListener(v -> validateAndBookAppointment());
+        setupBookButton();
+    }
+
+    private void initializeViews() {
+        etDate = findViewById(R.id.etDate);
+        etTime = findViewById(R.id.etTime);
+        etLocation = findViewById(R.id.etLocation);
+        etBarberName = findViewById(R.id.etBarberName);
+        actvService = findViewById(R.id.actvService);
+        actvShop = findViewById(R.id.actvShop);
+        etEndTime = findViewById(R.id.etEndTime);
+        btnBook = findViewById(R.id.btnBook);
     }
 
     private void setupShopDropdown() {
@@ -119,12 +113,10 @@ public class BookBarberActivity extends AppCompatActivity {
                             Service service = document.toObject(Service.class);
                             service.setId(document.getId());
                             services.add(service);
-                            // Format: "Service Name - 500rs"
                             serviceNamesWithPrice.add(String.format(Locale.getDefault(),
                                     "%s - %drs", service.getName(), (int)service.getCost()));
                         }
 
-                        // Setup dropdown adapter with prices
                         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                                 this,
                                 android.R.layout.simple_dropdown_item_1line,
@@ -137,95 +129,135 @@ public class BookBarberActivity extends AppCompatActivity {
                 });
     }
 
-    private void showDatePickerDialog() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, year, month, dayOfMonth) -> {
-                    selectedDate.set(year, month, dayOfMonth);
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                    etDate.setText(sdf.format(selectedDate.getTime()));
-                    calculateEndTime();
-                },
-                selectedDate.get(Calendar.YEAR),
-                selectedDate.get(Calendar.MONTH),
-                selectedDate.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-        datePickerDialog.show();
+    private void setupDatePicker() {
+        etDate.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    this,
+                    (view, year, month, dayOfMonth) -> {
+                        selectedDate.set(year, month, dayOfMonth);
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        etDate.setText(sdf.format(selectedDate.getTime()));
+                        calculateEndTime();
+                    },
+                    selectedDate.get(Calendar.YEAR),
+                    selectedDate.get(Calendar.MONTH),
+                    selectedDate.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            datePickerDialog.show();
+        });
     }
 
-    private void showTimePickerDialog() {
-        TimePickerDialog timePickerDialog = new TimePickerDialog(
-                this,
-                (view, hourOfDay, minute) -> {
-                    String time = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
-                    etTime.setText(time);
-                    calculateEndTime();
-                },
-                selectedDate.get(Calendar.HOUR_OF_DAY),
-                selectedDate.get(Calendar.MINUTE),
-                true
-        );
-        timePickerDialog.show();
+    private void setupTimePicker() {
+        etTime.setOnClickListener(v -> {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(
+                    this,
+                    (view, hourOfDay, minute) -> {
+                        String time = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
+                        etTime.setText(time);
+                        calculateEndTime();
+                    },
+                    selectedDate.get(Calendar.HOUR_OF_DAY),
+                    selectedDate.get(Calendar.MINUTE),
+                    true
+            );
+            timePickerDialog.show();
+        });
+    }
+
+    private void setupTimeChangeListener() {
+        etTime.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                calculateEndTime();
+            }
+        });
+
+        // Also listen for service selection changes
+        actvService.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                calculateEndTime();
+            }
+        });
     }
 
     private void calculateEndTime() {
+        // Check if all required fields are filled
         if (etDate.getText().toString().isEmpty() ||
                 etTime.getText().toString().isEmpty() ||
                 actvService.getText().toString().isEmpty()) {
+            etEndTime.setText("");
             return;
         }
 
         try {
-            // Get selected service duration
+            // Get selected service
             String selectedServiceText = actvService.getText().toString();
             Service selectedService = null;
+
             for (Service service : services) {
-                String serviceText = String.format("%s - %drs", service.getName(), (int)service.getCost());
+                String serviceText = String.format(Locale.getDefault(),
+                        "%s - %drs", service.getName(), (int)service.getCost());
                 if (serviceText.equals(selectedServiceText)) {
                     selectedService = service;
                     break;
                 }
             }
 
-            if (selectedService == null) return;
+            if (selectedService == null) {
+                etEndTime.setText("");
+                return;
+            }
 
             // Parse date and time
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
             String dateTimeStr = etDate.getText().toString() + " " + etTime.getText().toString();
-            Date startTime = dateFormat.parse(dateTimeStr);
+            Date startTime = dateTimeFormat.parse(dateTimeStr);
 
             // Calculate end time
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(startTime);
             calendar.add(Calendar.MINUTE, selectedService.getDuration());
 
-            // Display end time
+            // Format and display end time
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            tvEndTime.setText("End time: " + timeFormat.format(calendar.getTime()));
+            String endTime = timeFormat.format(calendar.getTime());
+            etEndTime.setText(endTime);
 
         } catch (ParseException e) {
             e.printStackTrace();
+            etEndTime.setText("");
+            Toast.makeText(this, "Invalid time format", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void setupBookButton() {
+        btnBook.setOnClickListener(v -> validateAndBookAppointment());
+    }
+
     private void validateAndBookAppointment() {
-        // Validate all fields are filled
         if (etLocation.getText().toString().isEmpty() ||
                 etBarberName.getText().toString().isEmpty() ||
                 actvShop.getText().toString().isEmpty() ||
                 actvService.getText().toString().isEmpty() ||
                 etDate.getText().toString().isEmpty() ||
-                etTime.getText().toString().isEmpty()) {
+                etTime.getText().toString().isEmpty() ||
+                etEndTime.getText().toString().isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validate salon timings
         try {
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             Date startTime = timeFormat.parse(etTime.getText().toString());
-            Date endTime = timeFormat.parse(tvEndTime.getText().toString().replace("End time: ", ""));
+            Date endTime = timeFormat.parse(etEndTime.getText().toString());
 
             Date openingTime = timeFormat.parse("11:00");
             Date closingTime = timeFormat.parse("21:00");
@@ -244,7 +276,6 @@ public class BookBarberActivity extends AppCompatActivity {
             return;
         }
 
-        // Get selected service
         String selectedServiceText = actvService.getText().toString();
         Service selectedService = null;
         for (Service service : services) {
@@ -259,7 +290,6 @@ public class BookBarberActivity extends AppCompatActivity {
             return;
         }
 
-        // First verify barber exists with matching name and location
         verifyBarberAndLocation(selectedService);
     }
 
@@ -276,7 +306,6 @@ public class BookBarberActivity extends AppCompatActivity {
                     if (userTask.isSuccessful() && !userTask.getResult().isEmpty()) {
                         selectedBarberUserId = userTask.getResult().getDocuments().get(0).getId();
 
-                        // Verify this user is actually a barber at the specified shop
                         db.collection("Barber")
                                 .whereEqualTo("user_id", selectedBarberUserId)
                                 .whereEqualTo("shop", shop)
@@ -288,7 +317,6 @@ public class BookBarberActivity extends AppCompatActivity {
                                                     "This barber doesn't work at " + shop + " in " + location,
                                                     Toast.LENGTH_LONG).show();
                                         } else {
-                                            // All validations passed - check for time conflicts
                                             checkForConflicts(selectedService);
                                         }
                                     } else {
@@ -314,19 +342,16 @@ public class BookBarberActivity extends AppCompatActivity {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
             Date startTime = dateFormat.parse(date + " " + time);
 
-            // Check if appointment is in the past
             if (startTime.before(new Date())) {
                 Toast.makeText(this, "Cannot book appointment in the past", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Calculate end time
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(startTime);
             calendar.add(Calendar.MINUTE, selectedService.getDuration());
             Date endTime = calendar.getTime();
 
-            // Query for conflicting appointments
             db.collection("Appointment")
                     .whereEqualTo("barber_id", selectedBarberUserId)
                     .whereEqualTo("date", date)
@@ -346,9 +371,8 @@ public class BookBarberActivity extends AppCompatActivity {
                                     Date existingEnd = timeFormat.parse(existingEndStr);
 
                                     Date newStart = timeFormat.parse(time);
-                                    Date newEnd = timeFormat.parse(tvEndTime.getText().toString().replace("End time: ", ""));
+                                    Date newEnd = timeFormat.parse(etEndTime.getText().toString());
 
-                                    // Check for time overlap
                                     if ((newStart.after(existingStart) && newStart.before(existingEnd)) ||
                                             (newEnd.after(existingStart) && newEnd.before(existingEnd)) ||
                                             (newStart.before(existingStart) && newEnd.after(existingEnd))) {
@@ -381,18 +405,15 @@ public class BookBarberActivity extends AppCompatActivity {
     private void createAppointment(Service selectedService, String date, String time, String shop) {
         String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        // Get customer email
         db.collection("User").document(customerId).get()
                 .addOnSuccessListener(customerDoc -> {
                     String customerEmail = customerDoc.getString("email");
 
-                    // Get barber email
                     db.collection("User").document(selectedBarberUserId).get()
                             .addOnSuccessListener(barberDoc -> {
                                 String barberEmail = barberDoc.getString("email");
                                 String barberName = barberDoc.getString("name");
 
-                                // Create appointment data
                                 Map<String, Object> appointment = new HashMap<>();
                                 appointment.put("customer_id", customerId);
                                 appointment.put("barber_id", selectedBarberUserId);
@@ -400,23 +421,21 @@ public class BookBarberActivity extends AppCompatActivity {
                                 appointment.put("status", "confirmed");
                                 appointment.put("date", date);
                                 appointment.put("start_time", time);
-                                appointment.put("end_time", tvEndTime.getText().toString().replace("End time: ", ""));
+                                appointment.put("end_time", etEndTime.getText().toString());
                                 appointment.put("shop", shop);
                                 appointment.put("location", etLocation.getText().toString());
                                 appointment.put("created_at", FieldValue.serverTimestamp());
 
-                                // Save to Firestore
                                 db.collection("Appointment")
                                         .add(appointment)
                                         .addOnSuccessListener(documentReference -> {
-                                            // Send confirmation emails
                                             sendConfirmationEmails(
                                                     customerEmail,
                                                     barberEmail,
                                                     barberName,
                                                     date,
                                                     time,
-                                                    tvEndTime.getText().toString().replace("End time: ", ""),
+                                                    etEndTime.getText().toString(),
                                                     selectedService.getName(),
                                                     etLocation.getText().toString()
                                             );
@@ -451,16 +470,14 @@ public class BookBarberActivity extends AppCompatActivity {
                                         String serviceName, String location) {
         new Thread(() -> {
             try {
-                // Email configuration (using Gmail SMTP as example)
                 Properties props = new Properties();
                 props.put("mail.smtp.host", "smtp.gmail.com");
                 props.put("mail.smtp.port", "587");
                 props.put("mail.smtp.auth", "true");
                 props.put("mail.smtp.starttls.enable", "true");
 
-                // Replace with your email credentials
                 final String username = "noreply.barberconnect@gmail.com";
-                final String password = "uixp izyt gmek eviz"; // Consider using app-specific password
+                final String password = "your_app_password"; // Replace with actual password
 
                 Session session = Session.getInstance(props,
                         new Authenticator() {
@@ -469,7 +486,7 @@ public class BookBarberActivity extends AppCompatActivity {
                             }
                         });
 
-                // Send email to customer
+                // Customer email
                 Message customerMessage = new MimeMessage(session);
                 customerMessage.setFrom(new InternetAddress(username));
                 customerMessage.setRecipients(Message.RecipientType.TO,
@@ -488,7 +505,7 @@ public class BookBarberActivity extends AppCompatActivity {
 
                 Transport.send(customerMessage);
 
-                // Send email to barber
+                // Barber email
                 Message barberMessage = new MimeMessage(session);
                 barberMessage.setFrom(new InternetAddress(username));
                 barberMessage.setRecipients(Message.RecipientType.TO,
@@ -517,7 +534,6 @@ public class BookBarberActivity extends AppCompatActivity {
         }).start();
     }
 
-    // Service model class
     public static class Service {
         private String id;
         private String name;
