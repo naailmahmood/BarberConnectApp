@@ -351,7 +351,7 @@ public class BookBarberActivity extends AppCompatActivity {
             calendar.setTime(startTime);
             calendar.add(Calendar.MINUTE, selectedService.getDuration());
             Date endTime = calendar.getTime();
-
+            // db collection
             db.collection("Appointment")
                     .whereEqualTo("barber_id", selectedBarberUserId)
                     .whereEqualTo("date", date)
