@@ -13,6 +13,15 @@
         android:theme="@style/Theme.BarberConnect"
         tools:targetApi="31">
         <activity
+            android:name=".MyAppointmentsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BrowseBarbersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BookBarberActivity"
+            android:exported="false" />
+        <activity
             android:name=".BarberDashboard"
             android:exported="false" />
         <activity
