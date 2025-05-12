@@ -49,7 +49,7 @@ public class BarberSignup extends Fragment {
         btnSubmit = view.findViewById(R.id.btnBarberSubmit);
 
 
-        String[] salonNames = {"Select Salon", "Blade", "BlazeOn", "Toni & Guy", "SmartCut"};
+        String[] salonNames = {"Select Salon", "Blade", "BlazeOn", "Tony & Guy", "SmartCut"};
         ArrayAdapter<String> salonAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, salonNames);
         salonAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSalon.setAdapter(salonAdapter);
