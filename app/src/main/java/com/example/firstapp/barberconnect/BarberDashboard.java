@@ -73,14 +73,12 @@ public class BarberDashboard extends AppCompatActivity {
     }
 
     private void loadAppointments() {
-        // First approach: Try with barberId as String
         Query query = db.collection("Appointment")
-                .whereEqualTo("barber_id", barberId)  // Changed to String comparison
+                .whereEqualTo("barber_id", barberId)
                 .whereEqualTo("status", "confirmed")
                 .orderBy("date", Query.Direction.ASCENDING)
                 .orderBy("start_time", Query.Direction.ASCENDING);
 
-        // Add snapshot listener for real-time updates (optional)
         query.addSnapshotListener((querySnapshot, error) -> {
             if (error != null) {
                 Log.e("FIRESTORE", "Listen failed: ", error);
@@ -88,18 +86,14 @@ public class BarberDashboard extends AppCompatActivity {
                 return;
             }
 
-            if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                appointmentList.clear();
-                Log.d("FIRESTORE", "Found " + querySnapshot.size() + " appointments");
+            appointmentList.clear();
 
+            if (querySnapshot != null && !querySnapshot.isEmpty()) {
                 for (QueryDocumentSnapshot document : querySnapshot) {
                     try {
-                        Log.d("FIRESTORE_DOC", "Processing doc: " + document.getId());
-
                         Appointment appointment = new Appointment();
                         appointment.setId(document.getId());
 
-                        // Handle barber_id - supports both String and DocumentReference
                         Object barberIdField = document.get("barber_id");
                         if (barberIdField instanceof DocumentReference) {
                             appointment.setBarber_id(((DocumentReference) barberIdField).getId());
@@ -107,7 +101,6 @@ public class BarberDashboard extends AppCompatActivity {
                             appointment.setBarber_id((String) barberIdField);
                         }
 
-                        // Handle customer_id
                         Object customerIdField = document.get("customer_id");
                         if (customerIdField instanceof DocumentReference) {
                             appointment.setCustomer_id(((DocumentReference) customerIdField).getId());
@@ -115,7 +108,6 @@ public class BarberDashboard extends AppCompatActivity {
                             appointment.setCustomer_id((String) customerIdField);
                         }
 
-                        // Handle service_id
                         Object serviceIdField = document.get("service_id");
                         if (serviceIdField instanceof DocumentReference) {
                             appointment.setService_id(((DocumentReference) serviceIdField).getId());
@@ -123,7 +115,6 @@ public class BarberDashboard extends AppCompatActivity {
                             appointment.setService_id((String) serviceIdField);
                         }
 
-                        // Set other fields
                         appointment.setDate(document.getString("date"));
                         appointment.setStart_time(document.getString("start_time"));
                         appointment.setEnd_time(document.getString("end_time"));
@@ -132,38 +123,22 @@ public class BarberDashboard extends AppCompatActivity {
                         appointment.setShop(document.getString("shop"));
 
                         appointmentList.add(appointment);
-                        Log.d("FIRESTORE_DOC", "Added appointment: " + appointment.getId());
                     } catch (Exception e) {
                         Log.e("FIRESTORE", "Error processing document " + document.getId(), e);
                     }
                 }
 
                 adapter.notifyDataSetChanged();
-                Log.d("FIRESTORE", "Appointments list updated with " + appointmentList.size() + " items");
-            } else {
-                Log.d("FIRESTORE", "No appointments found");
+            }
 
-                // Second approach: Try with DocumentReference if first approach failed
-                if (appointmentList.isEmpty()) {
-                    DocumentReference barberRef = db.collection("User").document(barberId);
-                    db.collection("Appointment")
-                            .whereEqualTo("barber_id", barberRef)
-                            .whereEqualTo("status", "confirmed")
-                            .get()
-                            .addOnCompleteListener(secondAttemptTask -> {
-                                if (secondAttemptTask.isSuccessful() && !secondAttemptTask.getResult().isEmpty()) {
-                                    Toast.makeText(this,
-                                            "Found appointments using DocumentReference",
-                                            Toast.LENGTH_SHORT).show();
-                                    // Process documents as above
-                                }
-                            });
-                }
-
+            // Show toast only if the list is still empty after attempting to populate
+            if (appointmentList.isEmpty()) {
                 Toast.makeText(this, "No confirmed appointments found", Toast.LENGTH_SHORT).show();
+                adapter.notifyDataSetChanged(); // Clear adapter visually
             }
         });
     }
+
 
     private void markAppointmentCompleted(Appointment appointment) {
         db.collection("Appointment").document(appointment.getId())
