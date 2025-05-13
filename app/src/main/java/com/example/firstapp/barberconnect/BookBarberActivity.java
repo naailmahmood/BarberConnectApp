@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -172,11 +173,13 @@ public class BookBarberActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                calculateEndTime();
+                // Only calculate if we have a complete time (HH:MM)
+                if (s.length() == 5 && s.toString().matches("\\d{2}:\\d{2}")) {
+                    calculateEndTime();
+                }
             }
         });
 
-        // Also listen for service selection changes
         actvService.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
@@ -232,9 +235,7 @@ public class BookBarberActivity extends AppCompatActivity {
             etEndTime.setText(endTime);
 
         } catch (ParseException e) {
-            e.printStackTrace();
             etEndTime.setText("");
-            Toast.makeText(this, "Invalid time format", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -272,7 +273,6 @@ public class BookBarberActivity extends AppCompatActivity {
                 return;
             }
         } catch (ParseException e) {
-            Toast.makeText(this, "Invalid time format", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -351,7 +351,7 @@ public class BookBarberActivity extends AppCompatActivity {
             calendar.setTime(startTime);
             calendar.add(Calendar.MINUTE, selectedService.getDuration());
             Date endTime = calendar.getTime();
-            // db collection
+
             db.collection("Appointment")
                     .whereEqualTo("barber_id", selectedBarberUserId)
                     .whereEqualTo("date", date)
@@ -408,11 +408,22 @@ public class BookBarberActivity extends AppCompatActivity {
         db.collection("User").document(customerId).get()
                 .addOnSuccessListener(customerDoc -> {
                     String customerEmail = customerDoc.getString("email");
+                    if (customerEmail == null || customerEmail.isEmpty()) {
+                        Toast.makeText(BookBarberActivity.this,
+                                "Customer email not found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     db.collection("User").document(selectedBarberUserId).get()
                             .addOnSuccessListener(barberDoc -> {
                                 String barberEmail = barberDoc.getString("email");
                                 String barberName = barberDoc.getString("name");
+
+                                if (barberEmail == null || barberEmail.isEmpty()) {
+                                    Toast.makeText(BookBarberActivity.this,
+                                            "Barber email not found", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
 
                                 Map<String, Object> appointment = new HashMap<>();
                                 appointment.put("customer_id", customerId);
@@ -437,7 +448,8 @@ public class BookBarberActivity extends AppCompatActivity {
                                                     time,
                                                     etEndTime.getText().toString(),
                                                     selectedService.getName(),
-                                                    etLocation.getText().toString()
+                                                    etLocation.getText().toString(),
+                                                    shop
                                             );
 
                                             Toast.makeText(BookBarberActivity.this,
@@ -453,13 +465,13 @@ public class BookBarberActivity extends AppCompatActivity {
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(BookBarberActivity.this,
-                                        "Failed to get barber information",
+                                        "Failed to get barber information: " + e.getMessage(),
                                         Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(BookBarberActivity.this,
-                            "Failed to get customer information",
+                            "Failed to get customer information: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
     }
@@ -467,72 +479,120 @@ public class BookBarberActivity extends AppCompatActivity {
     private void sendConfirmationEmails(String customerEmail, String barberEmail,
                                         String barberName, String date,
                                         String startTime, String endTime,
-                                        String serviceName, String location) {
-        new Thread(() -> {
-            try {
-                Properties props = new Properties();
-                props.put("mail.smtp.host", "smtp.gmail.com");
-                props.put("mail.smtp.port", "587");
-                props.put("mail.smtp.auth", "true");
-                props.put("mail.smtp.starttls.enable", "true");
+                                        String serviceName, String location, String shop) {
 
-                final String username = "noreply.barberconnect@gmail.com";
-                final String password = "your_app_password"; // Replace with actual password
+        String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                Session session = Session.getInstance(props,
-                        new Authenticator() {
-                            protected PasswordAuthentication getPasswordAuthentication() {
-                                return new PasswordAuthentication(username, password);
-                            }
-                        });
+        // ✅ Corrected collection: "Customer" instead of "User"
+        db.collection("Customer").document(customerId).get()
+                .addOnSuccessListener(customerDoc -> {
+                    String preferences = "No specific preferences";
+                    if (customerDoc.exists() && customerDoc.get("preferences") != null) {
+                        String fetchedPref = customerDoc.getString("preferences");
+                        if (fetchedPref != null && !fetchedPref.trim().isEmpty()) {
+                            preferences = fetchedPref;
+                        }
+                    }
 
-                // Customer email
-                Message customerMessage = new MimeMessage(session);
-                customerMessage.setFrom(new InternetAddress(username));
-                customerMessage.setRecipients(Message.RecipientType.TO,
-                        InternetAddress.parse(customerEmail));
-                customerMessage.setSubject("Your Barber Appointment Confirmation");
-                customerMessage.setText(String.format(Locale.getDefault(),
-                        "Dear Customer,\n\n" +
-                                "Your appointment has been confirmed:\n\n" +
-                                "Barber: %s\n" +
-                                "Service: %s\n" +
-                                "Date: %s\n" +
-                                "Time: %s to %s\n" +
-                                "Location: %s\n\n" +
-                                "Thank you for choosing our service!",
-                        barberName, serviceName, date, startTime, endTime, location));
+                    final String finalPreferences = preferences;
 
-                Transport.send(customerMessage);
+                    db.collection("Service")
+                            .whereEqualTo("name", serviceName.split(" - ")[0])
+                            .get()
+                            .addOnSuccessListener(serviceQuery -> {
+                                if (!serviceQuery.isEmpty()) {
+                                    double serviceCost = serviceQuery.getDocuments().get(0).getDouble("cost");
 
-                // Barber email
-                Message barberMessage = new MimeMessage(session);
-                barberMessage.setFrom(new InternetAddress(username));
-                barberMessage.setRecipients(Message.RecipientType.TO,
-                        InternetAddress.parse(barberEmail));
-                barberMessage.setSubject("New Appointment Booking");
-                barberMessage.setText(String.format(Locale.getDefault(),
-                        "Hello %s,\n\n" +
-                                "You have a new appointment:\n\n" +
-                                "Service: %s\n" +
-                                "Date: %s\n" +
-                                "Time: %s to %s\n" +
-                                "Customer Location: %s\n\n" +
-                                "Please be prepared for your appointment.",
-                        barberName, serviceName, date, startTime, endTime, location));
+                                    String barberSubject = "New Appointment Booking - BarberConnect";
+                                    String barberMessage = "Hello " + barberName + ",\n\n" +
+                                            "You have a new appointment booked:\n\n" +
+                                            "Service: " + serviceName + "\n" +
+                                            "Date: " + date + "\n" +
+                                            "Time: " + startTime + " - " + endTime + "\n" +
+                                            "Customer Preferences: " + finalPreferences + "\n\n" +
+                                            "Thank you,\nBarberConnect Team";
 
-                Transport.send(barberMessage);
+                                    String customerSubject = "Your Appointment Confirmation - BarberConnect";
+                                    String customerMessage = "Dear Customer,\n\n" +
+                                            "Your appointment has been confirmed:\n\n" +
+                                            "Barber: " + barberName + "\n" +
+                                            "Service: " + serviceName + "\n" +
+                                            "Cost: Rs." + String.format(Locale.getDefault(), "%.2f", serviceCost) + "\n" +
+                                            "Date: " + date + "\n" +
+                                            "Time: " + startTime + " - " + endTime + "\n" +
+                                            "Shop: " + shop + "\n" +
+                                            "Location: " + location + "\n\n" +
+                                            "We look forward to seeing you!\n\n" +
+                                            "Best regards,\nBarberConnect Team";
 
-                runOnUiThread(() -> Toast.makeText(BookBarberActivity.this,
-                        "Confirmation emails sent", Toast.LENGTH_SHORT).show());
+                                    new Thread(() -> {
+                                        try {
+                                            final String senderEmail = "noreply.barberconnect@gmail.com";
+                                            final String senderPassword = "vwkv xyhj smvm qpwu";
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(BookBarberActivity.this,
-                        "Failed to send confirmation emails", Toast.LENGTH_SHORT).show());
-            }
-        }).start();
+                                            Properties props = new Properties();
+                                            props.put("mail.smtp.auth", "true");
+                                            props.put("mail.smtp.starttls.enable", "true");
+                                            props.put("mail.smtp.host", "smtp.gmail.com");
+                                            props.put("mail.smtp.port", "587");
+                                            props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+
+                                            Session session = Session.getInstance(props, new Authenticator() {
+                                                @Override
+                                                protected PasswordAuthentication getPasswordAuthentication() {
+                                                    return new PasswordAuthentication(senderEmail, senderPassword);
+                                                }
+                                            });
+
+                                            Message barberEmailMsg = new MimeMessage(session);
+                                            barberEmailMsg.setFrom(new InternetAddress(senderEmail));
+                                            barberEmailMsg.setRecipients(Message.RecipientType.TO,
+                                                    InternetAddress.parse(barberEmail));
+                                            barberEmailMsg.setSubject(barberSubject);
+                                            barberEmailMsg.setText(barberMessage);
+                                            Transport.send(barberEmailMsg);
+
+                                            Message customerEmailMsg = new MimeMessage(session);
+                                            customerEmailMsg.setFrom(new InternetAddress(senderEmail));
+                                            customerEmailMsg.setRecipients(Message.RecipientType.TO,
+                                                    InternetAddress.parse(customerEmail));
+                                            customerEmailMsg.setSubject(customerSubject);
+                                            customerEmailMsg.setText(customerMessage);
+                                            Transport.send(customerEmailMsg);
+
+                                            runOnUiThread(() -> Toast.makeText(BookBarberActivity.this,
+                                                    "Confirmation emails sent successfully!",
+                                                    Toast.LENGTH_SHORT).show());
+
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            runOnUiThread(() -> Toast.makeText(BookBarberActivity.this,
+                                                    "Failed to send emails: " + e.getMessage(),
+                                                    Toast.LENGTH_LONG).show());
+                                        }
+                                    }).start();
+
+                                } else {
+                                    Toast.makeText(BookBarberActivity.this,
+                                            "Could not find service details",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(BookBarberActivity.this,
+                                    "Failed to get service cost: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show());
+
+                })
+                .addOnFailureListener(e -> Toast.makeText(BookBarberActivity.this,
+                        "Failed to load customer preferences: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
     }
+
+
+
+
+
+
 
     public static class Service {
         private String id;
