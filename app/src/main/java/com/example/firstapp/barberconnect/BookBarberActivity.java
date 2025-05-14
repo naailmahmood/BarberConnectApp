@@ -93,7 +93,7 @@ public class BookBarberActivity extends AppCompatActivity {
         btnBook = findViewById(R.id.btnBook);
     }
 
-    private void setupShopDropdown() {
+    private void setupShopDropdown() {    // simple syntax nothing more
         ArrayAdapter<String> shopAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_dropdown_item_1line,
@@ -118,7 +118,7 @@ public class BookBarberActivity extends AppCompatActivity {
                                     "%s - %drs", service.getName(), (int)service.getCost()));
                         }
 
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(  // dropdown syntax of services
                                 this,
                                 android.R.layout.simple_dropdown_item_1line,
                                 serviceNamesWithPrice
@@ -130,7 +130,7 @@ public class BookBarberActivity extends AppCompatActivity {
                 });
     }
 
-    private void setupDatePicker() {
+    private void setupDatePicker() {     // DATE PICKING HERE
         etDate.setOnClickListener(v -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     this,
@@ -149,7 +149,7 @@ public class BookBarberActivity extends AppCompatActivity {
         });
     }
 
-    private void setupTimePicker() {
+    private void setupTimePicker() {   // for time
         etTime.setOnClickListener(v -> {
             TimePickerDialog timePickerDialog = new TimePickerDialog(
                     this,
@@ -250,12 +250,12 @@ public class BookBarberActivity extends AppCompatActivity {
                 actvService.getText().toString().isEmpty() ||
                 etDate.getText().toString().isEmpty() ||
                 etTime.getText().toString().isEmpty() ||
-                etEndTime.getText().toString().isEmpty()) {
+                etEndTime.getText().toString().isEmpty()) {   // cehcking if any field empty
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        try {
+        try {    // checking if time is set b/w salon timings
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             Date startTime = timeFormat.parse(etTime.getText().toString());
             Date endTime = timeFormat.parse(etEndTime.getText().toString());
@@ -276,7 +276,7 @@ public class BookBarberActivity extends AppCompatActivity {
             return;
         }
 
-        String selectedServiceText = actvService.getText().toString();
+        String selectedServiceText = actvService.getText().toString();    // checking is service is valid
         Service selectedService = null;
         for (Service service : services) {
             String serviceText = String.format("%s - %drs", service.getName(), (int)service.getCost());
@@ -293,7 +293,7 @@ public class BookBarberActivity extends AppCompatActivity {
         verifyBarberAndLocation(selectedService);
     }
 
-    private void verifyBarberAndLocation(Service selectedService) {
+    private void verifyBarberAndLocation(Service selectedService) {   // checking if the barber is from same location and salon selected
         String barberName = etBarberName.getText().toString().trim();
         String location = etLocation.getText().toString().trim();
         String shop = actvShop.getText().toString().trim();
@@ -425,7 +425,7 @@ public class BookBarberActivity extends AppCompatActivity {
                                     return;
                                 }
 
-                                Map<String, Object> appointment = new HashMap<>();
+                                Map<String, Object> appointment = new HashMap<>();   // database mai rakhwa rhy
                                 appointment.put("customer_id", customerId);
                                 appointment.put("barber_id", selectedBarberUserId);
                                 appointment.put("service_id", selectedService.getId());
@@ -483,7 +483,6 @@ public class BookBarberActivity extends AppCompatActivity {
 
         String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        // ✅ Corrected collection: "Customer" instead of "User"
         db.collection("Customer").document(customerId).get()
                 .addOnSuccessListener(customerDoc -> {
                     String preferences = "No specific preferences";

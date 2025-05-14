@@ -157,7 +157,7 @@ public class RatingActivity extends AppCompatActivity {
                                 float averageRating = totalRating / ratingCount;
 
                                 Map<String, Object> updateData = new HashMap<>();
-                                updateData.put("rating", averageRating); // ✅ This is the key fix
+                                updateData.put("rating", averageRating);
                                 updateData.put("average_rating", averageRating);
                                 updateData.put("rating_count", ratingCount);
 

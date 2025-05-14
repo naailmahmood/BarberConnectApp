@@ -27,7 +27,6 @@ public class CustomerDashboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_dashboard);
 
-        // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -36,13 +35,13 @@ public class CustomerDashboard extends AppCompatActivity {
             userId = currentUser.getUid();
         }
 
-        // Initialize views
+              // HERE WE ARE INITIALIZING VIEWS
         txtUserName = findViewById(R.id.txtUserName);
         bookBarberCard = findViewById(R.id.bookBarberCard);
         browseBarbersCard = findViewById(R.id.browseBarbersCard);
         myAppointmentsCard = findViewById(R.id.myAppointmentsCard);
 
-        // Set click listeners
+        // setting click listeners
         bookBarberCard.setOnClickListener(v -> {
             Intent intent = new Intent(CustomerDashboard.this, BookBarberActivity.class);
             startActivity(intent);
@@ -58,7 +57,7 @@ public class CustomerDashboard extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Load user data
+        // Load data
         loadUserData();
     }
 
@@ -73,18 +72,15 @@ public class CustomerDashboard extends AppCompatActivity {
                     }
                 }
             }).addOnFailureListener(e -> {
-                // Handle failure
             });
         }
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart() {   // just checking if user is signed in
         super.onStart();
-        // Check if user is signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            // Redirect to login if not authenticated
             startActivity(new Intent(CustomerDashboard.this, HomeScreen.class));
             finish();
         }
