@@ -28,14 +28,14 @@ public class Signup extends AppCompatActivity {
         btnBecomeABarber.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Hide the buttons
+                // hide the buttons
                 btnBecomeABarber.setVisibility(View.GONE);
                 btnRegisterAsClient.setVisibility(View.GONE);
 
-                // Show fragment container
+                // show fragment container
                 fragmentContainer.setVisibility(View.VISIBLE);
 
-                // Load the fragment
+                // load the fragment
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_container, new BarberSignup())
@@ -54,7 +54,7 @@ public class Signup extends AppCompatActivity {
 
                 fragmentContainer.setVisibility(View.VISIBLE);
 
-                // Load the fragment
+                // load the fragment
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_container, new CustomerSignup())
@@ -67,19 +67,19 @@ public class Signup extends AppCompatActivity {
     public void onBackPressed() {
         FrameLayout fragmentContainer = findViewById(R.id.fragment_container);
 
-        // If the fragment is currently visible
+        // if the fragment is currently visible
         if (fragmentContainer.getVisibility() == View.VISIBLE) {
-            // Remove the fragment
+            // remove the fragment
             getSupportFragmentManager().beginTransaction()
                     .remove(getSupportFragmentManager().findFragmentById(R.id.fragment_container))
                     .commit();
 
-            // Hide fragment container and show buttons again
+            // hide fragment container and show buttons again
             fragmentContainer.setVisibility(View.GONE);
             findViewById(R.id.becomeABarberBtn).setVisibility(View.VISIBLE);
             findViewById(R.id.registerAsClientBtn).setVisibility(View.VISIBLE);
         } else {
-            // Default back behavior (exit activity)
+            // default back behavior (exit activity)
             super.onBackPressed();
         }
     }

@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             android:layout_marginBottom="24dp"
             android:gravity="center"/>
 
-        <!-- Location Input -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
                 android:inputType="textCapWords"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Barber Name Input -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
                 android:inputType="textPersonName"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Shop Selection -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
                 android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Service Selection -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,7 +85,7 @@
                 android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Date Picker -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -102,7 +102,7 @@
                 android:inputType="date"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Time Input -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
                 android:inputType="time"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- End Time Display (Updated to match other fields) -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEndTime"
             android:layout_width="match_parent"
@@ -135,7 +135,7 @@
                 android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Book Button -->
+
         <Button
             android:id="@+id/btnBook"
             android:layout_width="match_parent"

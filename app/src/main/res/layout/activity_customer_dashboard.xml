@@ -10,7 +10,7 @@
     tools:context=".CustomerDashboard"
     android:fitsSystemWindows="true">
 
-    <!-- Welcome Header -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,14 +37,14 @@
             android:layout_marginTop="8dp"/>
     </LinearLayout>
 
-    <!-- Dashboard Buttons -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="20dp">
 
-        <!-- Book a Barber Button -->
+
         <androidx.cardview.widget.CardView
             android:id="@+id/bookBarberCard"
             android:layout_width="match_parent"
@@ -65,8 +65,7 @@
                     android:id="@+id/bookBarberIcon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:tint="@color/white"
-                    android:src="@drawable/user"/>
+                    android:src="@drawable/bookbarber"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -79,7 +78,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Browse Barbers Button -->
+
         <androidx.cardview.widget.CardView
             android:id="@+id/browseBarbersCard"
             android:layout_width="match_parent"
@@ -100,8 +99,7 @@
                     android:id="@+id/browseBarbersIcon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:tint="@color/white"
-                    android:src="@drawable/user"/>
+                    android:src="@drawable/browsebarber"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -114,7 +112,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- My Appointments Button -->
+
         <androidx.cardview.widget.CardView
             android:id="@+id/myAppointmentsCard"
             android:layout_width="match_parent"
@@ -134,8 +132,7 @@
                     android:id="@+id/appointmentsIcon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:tint="@color/white"
-                    android:src="@drawable/user"/>
+                    android:src="@drawable/appointment"/>
 
                 <TextView
                     android:layout_width="wrap_content"

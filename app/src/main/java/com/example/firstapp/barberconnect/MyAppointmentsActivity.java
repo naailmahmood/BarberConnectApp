@@ -60,7 +60,7 @@ public class MyAppointmentsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadAppointments(); // ✅ Refresh on return from RatingActivity
+        loadAppointments();
     }
 
     private void loadAppointments() {
@@ -155,7 +155,7 @@ public class MyAppointmentsActivity extends AppCompatActivity {
                     statusButton.setText("Confirmed");
                     statusButton.setEnabled(false);
                 } else if ("completed".equals(appointment.getStatus())) {
-                    db.collection("Rating") // ✅ fixed collection name
+                    db.collection("Rating")
                             .whereEqualTo("appointment_id", appointment.getId())
                             .limit(1)
                             .get()

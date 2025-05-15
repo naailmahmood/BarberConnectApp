@@ -56,8 +56,6 @@ public class CustomerDashboard extends AppCompatActivity {
             Intent intent = new Intent(CustomerDashboard.this, MyAppointmentsActivity.class);
             startActivity(intent);
         });
-
-        // Load data
         loadUserData();
     }
 

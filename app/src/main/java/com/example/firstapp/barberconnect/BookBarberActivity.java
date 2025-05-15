@@ -50,7 +50,6 @@ public class BookBarberActivity extends AppCompatActivity {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String selectedBarberUserId = null;
 
-    // List of available shops
     private final List<String> shops = Arrays.asList(
             "BlazeOn", "Blade", "Tony & Guy", "SmartCut", "Classic Salon"
     );
@@ -60,25 +59,25 @@ public class BookBarberActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_barber);
 
-        // Initialize views
+        // initialize views
         initializeViews();
 
-        // Setup shop dropdown
+        // setup shop dropdown
         setupShopDropdown();
 
-        // Load services from Firestore
+        // load services from Firestore
         loadServices();
 
-        // Set up date picker
+        // set up date picker
         setupDatePicker();
 
-        // Set up time picker
+        // set up time picker
         setupTimePicker();
 
-        // Time change listener for end time calculation
+        // time change listener for end time calculation
         setupTimeChangeListener();
 
-        // Book button click listener
+        // book button click listener
         setupBookButton();
     }
 
@@ -173,7 +172,7 @@ public class BookBarberActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // Only calculate if we have a complete time (HH:MM)
+                // only calculate if we have a complete time (HH:MM)
                 if (s.length() == 5 && s.toString().matches("\\d{2}:\\d{2}")) {
                     calculateEndTime();
                 }
@@ -192,7 +191,7 @@ public class BookBarberActivity extends AppCompatActivity {
     }
 
     private void calculateEndTime() {
-        // Check if all required fields are filled
+        // check if all required fields are filled
         if (etDate.getText().toString().isEmpty() ||
                 etTime.getText().toString().isEmpty() ||
                 actvService.getText().toString().isEmpty()) {
@@ -201,7 +200,7 @@ public class BookBarberActivity extends AppCompatActivity {
         }
 
         try {
-            // Get selected service
+            // get selected service
             String selectedServiceText = actvService.getText().toString();
             Service selectedService = null;
 
@@ -219,17 +218,17 @@ public class BookBarberActivity extends AppCompatActivity {
                 return;
             }
 
-            // Parse date and time
+            // parse date and time
             SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
             String dateTimeStr = etDate.getText().toString() + " " + etTime.getText().toString();
             Date startTime = dateTimeFormat.parse(dateTimeStr);
 
-            // Calculate end time
+            // calculate end time
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(startTime);
             calendar.add(Calendar.MINUTE, selectedService.getDuration());
 
-            // Format and display end time
+            // format and display end time
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
             String endTime = timeFormat.format(calendar.getTime());
             etEndTime.setText(endTime);
@@ -276,7 +275,7 @@ public class BookBarberActivity extends AppCompatActivity {
             return;
         }
 
-        String selectedServiceText = actvService.getText().toString();    // checking is service is valid
+        String selectedServiceText = actvService.getText().toString();    // checking if service is valid
         Service selectedService = null;
         for (Service service : services) {
             String serviceText = String.format("%s - %drs", service.getName(), (int)service.getCost());
@@ -502,6 +501,8 @@ public class BookBarberActivity extends AppCompatActivity {
                                 if (!serviceQuery.isEmpty()) {
                                     double serviceCost = serviceQuery.getDocuments().get(0).getDouble("cost");
 
+                                    // SENDING EMAIL TO BARBER :
+
                                     String barberSubject = "New Appointment Booking - BarberConnect";
                                     String barberMessage = "Hello " + barberName + ",\n\n" +
                                             "You have a new appointment booked:\n\n" +
@@ -510,6 +511,9 @@ public class BookBarberActivity extends AppCompatActivity {
                                             "Time: " + startTime + " - " + endTime + "\n" +
                                             "Customer Preferences: " + finalPreferences + "\n\n" +
                                             "Thank you,\nBarberConnect Team";
+
+
+                                    // SENDING EMAIL TO CUSTOMER
 
                                     String customerSubject = "Your Appointment Confirmation - BarberConnect";
                                     String customerMessage = "Dear Customer,\n\n" +

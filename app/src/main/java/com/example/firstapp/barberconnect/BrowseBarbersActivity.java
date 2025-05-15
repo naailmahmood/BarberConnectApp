@@ -47,11 +47,11 @@ public class BrowseBarbersActivity extends AppCompatActivity {
                     String shop = barberDoc.getString("shop");
                     double rating = barberDoc.contains("rating") ? barberDoc.getDouble("rating") : 0.0;
 
-                    // Get name and location from User collection
+                    // get name and location from User collection
                     db.collection("User").document(barberId).get().addOnSuccessListener(userDoc -> {
                         if (userDoc.exists()) {
                             String name = userDoc.getString("name");
-                            String location = userDoc.getString("location"); // Get location from User
+                            String location = userDoc.getString("location"); // get location from User
 
                             BarberProfile profile = new BarberProfile(name, location, shop, rating);
                             barberList.add(profile);
@@ -68,7 +68,7 @@ public class BrowseBarbersActivity extends AppCompatActivity {
     }
 
 
-    // Model class
+
     public static class BarberProfile {
         private String name;
         private String location;
@@ -88,7 +88,7 @@ public class BrowseBarbersActivity extends AppCompatActivity {
         public double getRating() { return rating; }
     }
 
-    // Adapter
+    // recycler adapter
     public class BarberAdapter extends RecyclerView.Adapter<BarberAdapter.BarberViewHolder> {
 
         private List<BarberProfile> barberList;

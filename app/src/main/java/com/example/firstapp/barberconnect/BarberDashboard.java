@@ -131,7 +131,7 @@ public class BarberDashboard extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
 
-            // Show toast only if the list is still empty after attempting to populate
+            // if list is empty
             if (appointmentList.isEmpty()) {
                 Toast.makeText(this, "No confirmed appointments found", Toast.LENGTH_SHORT).show();
                 adapter.notifyDataSetChanged(); // Clear adapter visually
@@ -145,7 +145,7 @@ public class BarberDashboard extends AppCompatActivity {
                 .update("status", "completed")
                 .addOnSuccessListener(aVoid -> {
                     sendCompletionEmail(appointment);
-                    loadAppointments(); // Refresh the list
+                    loadAppointments(); // refresh the list
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to update appointment", Toast.LENGTH_SHORT).show();
@@ -153,21 +153,21 @@ public class BarberDashboard extends AppCompatActivity {
     }
 
     private void sendCompletionEmail(Appointment appointment) {
-        // Execute email sending in background thread
+        // execute email sending in background thread
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
-                // Get service cost
+                // get service cost
                 DocumentReference serviceRef = db.collection("Service").document(appointment.getService_id());
                 DocumentSnapshot serviceDoc = Tasks.await(serviceRef.get());
                 double serviceCost = serviceDoc.getDouble("cost");
 
-                // Get customer email
+                // get customer email
                 DocumentReference customerRef = db.collection("User").document(appointment.getCustomer_id());
                 DocumentSnapshot customerDoc = Tasks.await(customerRef.get());
                 String customerEmail = customerDoc.getString("email");
 
-                // Send email
+                // send email
                 sendEmailToCustomer(customerEmail, appointment, serviceCost);
             } catch (Exception e) {
                 Log.e("EMAIL_ERROR", "Failed to send completion email", e);
@@ -191,7 +191,7 @@ public class BarberDashboard extends AppCompatActivity {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(
                             "noreply.barberconnect@gmail.com",
-                            "vwkv xyhj smvm qpwu" // Consider moving this to secure storage
+                            "vwkv xyhj smvm qpwu"
                     );
                 }
             });
@@ -270,7 +270,7 @@ public class BarberDashboard extends AppCompatActivity {
             }
 
             public void bind(Appointment appointment) {
-                // Load client name using document reference
+                // load client name using document reference
                 DocumentReference customerRef = db.collection("User").document(appointment.getCustomer_id());
                 customerRef.get().addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
@@ -279,7 +279,7 @@ public class BarberDashboard extends AppCompatActivity {
                     }
                 });
 
-                // Load service name using document reference
+                // load service name using document reference
                 DocumentReference serviceRef = db.collection("Service").document(appointment.getService_id());
                 serviceRef.get().addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
@@ -287,7 +287,7 @@ public class BarberDashboard extends AppCompatActivity {
                         serviceTextView.setText("Service: " + serviceName);
                     }
                 });
-                dateTextView.setText("Date: " + appointment.getDate()); // NEW
+                dateTextView.setText("Date: " + appointment.getDate());
                 timeTextView.setText("Time: " + appointment.getStart_time() + " - " + appointment.getEnd_time());
                 statusButton.setText("Mark as Completed");
                 statusButton.setOnClickListener(v -> markAppointmentCompleted(appointment));
