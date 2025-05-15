@@ -122,12 +122,16 @@ public class MyAppointmentsActivity extends AppCompatActivity {
             private TextView timeTextView;
             private Button statusButton;
 
+            private TextView dateTextView;
+
             public MyAppointmentViewHolder(@NonNull View itemView) {
                 super(itemView);
                 serviceTextView = itemView.findViewById(R.id.serviceTextView);
                 barberTextView = itemView.findViewById(R.id.barberTextView);
                 timeTextView = itemView.findViewById(R.id.timeTextView);
                 statusButton = itemView.findViewById(R.id.statusButton);
+                dateTextView = itemView.findViewById(R.id.dateTextView);
+
             }
 
             public void bind(BarberDashboard.Appointment appointment) {
@@ -144,7 +148,7 @@ public class MyAppointmentsActivity extends AppCompatActivity {
                         barberTextView.setText("Barber: " + barberDoc.getString("name"));
                     }
                 });
-
+                dateTextView.setText("Date: " + appointment.getDate());
                 timeTextView.setText("Time: " + appointment.getStart_time() + " - " + appointment.getEnd_time());
 
                 if ("confirmed".equals(appointment.getStatus())) {

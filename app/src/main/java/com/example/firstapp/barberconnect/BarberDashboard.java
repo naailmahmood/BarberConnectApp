@@ -254,12 +254,17 @@ public class BarberDashboard extends AppCompatActivity {
             private TextView clientNameTextView;
             private TextView serviceTextView;
             private TextView timeTextView;
+
+            private TextView dateTextView;
             private Button statusButton;
+
+
 
             public AppointmentViewHolder(@NonNull View itemView) {
                 super(itemView);
                 clientNameTextView = itemView.findViewById(R.id.clientNameTextView);
                 serviceTextView = itemView.findViewById(R.id.serviceTextView);
+                dateTextView = itemView.findViewById(R.id.dateTextView);
                 timeTextView = itemView.findViewById(R.id.timeTextView);
                 statusButton = itemView.findViewById(R.id.statusButton);
             }
@@ -282,7 +287,7 @@ public class BarberDashboard extends AppCompatActivity {
                         serviceTextView.setText("Service: " + serviceName);
                     }
                 });
-
+                dateTextView.setText("Date: " + appointment.getDate()); // NEW
                 timeTextView.setText("Time: " + appointment.getStart_time() + " - " + appointment.getEnd_time());
                 statusButton.setText("Mark as Completed");
                 statusButton.setOnClickListener(v -> markAppointmentCompleted(appointment));
